@@ -1,0 +1,139 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{94C11852-0026-4516-ABDB-0EE944FBEA4B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>MeasureIt</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.xml" />
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CodeTimers.cs" />
+    <Compile Include="ComputerSpecs.cs" />
+    <Compile Include="MeasureIt.cs" />
+    <Compile Include="PerformanceMeasurement.cs" />
+    <Compile Include="PowerManagement.cs" />
+    <Compile Include="_README.cs" />
+    <Compile Include="Library\Util\ResourceUtilities.cs" />
+    <Compile Include="Library\Util\StreamUtilities.cs" />
+    <Compile Include="Library\Util\UsersGuide.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CodeTimers.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>CodeTimers.cs</Link>
+      <LogicalName>CodeTimers.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComputerSpecs.cs">
+      <WithCulture>false</WithCulture>
+      <Link>ComputerSpecs.cs</Link>
+      <LogicalName>ComputerSpecs.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MeasureIt.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>MeasureIt.cs</Link>
+      <LogicalName>MeasureIt.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PerformanceMeasurement.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>PerformanceMeasurement.cs</Link>
+      <LogicalName>PerformanceMeasurement.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="_README.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>_README.cs</Link>
+      <LogicalName>_README.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Library\Util\ResourceUtilities.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>Library\Util\ResourceUtilities.cs</Link>
+      <LogicalName>Library\Util\ResourceUtilities.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Library\Util\StreamUtilities.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>Library\Util\StreamUtilities.cs</Link>
+      <LogicalName>Library\Util\StreamUtilities.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Library\Util\UsersGuide.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>Library\Util\UsersGuide.cs</Link>
+      <LogicalName>Library\Util\UsersGuide.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MeasureIt.sln">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>MeasureIt.sln</Link>
+      <LogicalName>MeasureIt.sln</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MeasureIt.V9.sln">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>MeasureIt.V9.sln</Link>
+      <LogicalName>MeasureIt.V9.sln</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PowerManagement.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>PowerManagement.cs</Link>
+      <LogicalName>PowerManagement.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MeasureIt.csproj">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>MeasureIt.csproj</Link>
+      <LogicalName>MeasureIt.csproj</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Build.bat">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>Build.bat</Link>
+      <LogicalName>Build.bat</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UsersGuide.htm">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <LogicalName>UsersGuide.htm</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)..\$(TargetFileName)"</PostBuildEvent>
+  </PropertyGroup>
+</Project>

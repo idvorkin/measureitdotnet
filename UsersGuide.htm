@@ -1,0 +1,667 @@
+<html>
+<head>
+<title>MeasureIt Users Guide</title>
+    <style type="text/css">
+        .style1
+        {
+            color: #CC0000;
+        }
+    </style>
+</head>
+<body>
+<h2> &nbsp;MeasureIt Users&#39; Guide </h2>
+<h3> Table Of Contents</h3>
+<ol>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#Simple">Simple Usage:&nbsp; Understanding the costs of runtime primitives</a></li>
+    <li><a href="#HowMeasurements">How Measurements are Actually Taken</a> 
+    <ul>
+    <li><a href="#Limits">Limits of accuracy</a> </li>    
+    </ul>    
+    </li>
+    <li><a href="#Unpacking">Unpacking the Source</a> 
+    <ul>
+    <li><a href="#Rebuilding">Rebuilding MeasureIt</a> </li>
+    </ul>
+    </li>
+    <li><a href="#Debugging">Debugging Optimized Code In Visual Studio (Validating a benchmark) 
+        </a> </li>
+    <li><a href="#NewBenchmarks">Making New Benchmarks</a> 
+    <ul>
+        <li><a href="#Scaling">Scaling Small Benchmarks</a> </li>
+        <li><a href="#LoopCounts">Modifying the Loop Counts </a> </li>
+        <li><a href="#State">Benchmarks with State</a></li>
+    </ul>
+    </li>
+    <li><a href="#PowerOptions">Power Options</a></li>
+    <li><a href="#Contributions">Contributions</a></li>
+</ol>
+<h3><a name="Introduction">
+    Introduction</a></h3>
+<p>
+    Most programmers should be doing more performance measurements as they design 
+    and measure code.&nbsp; It is impossible to create a high performance 
+    application unless you understand the costs of the operations that you use.&nbsp;&nbsp; 
+    Because the .NET framework is a virtual machine, the operations are more 
+    &#39;abstract&#39; and thus it is even harder to reason about the cost of operations 
+    from first principles.</p>
+<p>
+    To solve this problem, it is&nbsp; often suggested that the document ion for 
+    classes and methods include information on expensive the operations are.&nbsp; 
+    Unfortunately, this problematic because
+</p>
+<ul>
+    <li>The set of classes and methods is large (and growing), making generating the 
+        information expensive. </li>
+    <li>The cost is often not simple to describe.&nbsp;&nbsp; Often it depends on multiple 
+        arguments.&nbsp; Often there is a large first time cost.&nbsp;&nbsp; Sometimes there is a 
+        cache, which means random arguments have one costs, but repeated access to 
+        arguments used in the recent past have a much lower cost.&nbsp; &nbsp; Sometimes the costs 
+        is highly input dependent (e.g.. Sorting).&nbsp; </li>
+    <li>The costs can vary depending on the scale of the problem (doing operations on 
+        small vectors is typically CPU bound, doing them on very large vectors, becomes 
+        CPU cache bound).&nbsp; </li>
+    <li>The costs change over time due to changes in the code, or the underlying support 
+        code (eg .NET Runtime or OS version).&nbsp; </li>
+    <li>The costs depend on configuration (did you NGEN, are you a Multi-Appdomain 
+        scenario, is your scenario fully trusted or not)</li>
+    <li>The costs depend on CPU architecture, which also change over time (sometimes 
+        dramatically)</li>
+</ul>
+<p>
+    These factors make it difficult to provide useful performance information as 
+    &#39;normal&#39; documentation.&nbsp; As an alternative, the <b>MeasureIt</b> utility 
+    attempts to make it really easy for you to measure the costs of operations that 
+    are important for YOUR application.&nbsp;&nbsp; These can then be run the CPUs, 
+    OS, runtimes, and software versions that are relevant to you (and you can see if 
+    they vary or not).&nbsp;&nbsp; You can also &#39;mock up&#39; code that closely 
+    resembles the performance-critical code paths in your application to insure that 
+    types of inputs fed to the methods of interest are &#39;representative&#39; of your 
+    application.&nbsp;&nbsp;&nbsp; You can then experiment with variations on your 
+    design and find the most efficient implementation.</p>
+<h3>
+    <a class="" name="Simple">Simple Usage:&nbsp; The Costs of Runtime Primitives</a></h3>
+<p>
+    <b>MeasureIt</b> comes with a set of &#39;built-in&#39; performance benchmarks that 
+    measure the &#39;basics&#39; of the runtime.&nbsp; These benchmarks measure the speed of 
+    method call, field access, and other common operations.&nbsp; Running MeasureIt 
+    without any parameters will run all of these built-in benchmarks.&nbsp;&nbsp; 
+    For example, running the command</p>
+<blockquote>
+    MeasureIt</blockquote>
+<p>
+    Runs all the &#39;default&#39; benchmarks.&nbsp;&nbsp; After completion it displays a 
+    HTML page with a table like the table abbreviated below.&nbsp;
+</p>
+<dl>
+    <dd>
+        <p>
+            Scaled where EmptyStaticFunction = 1.0 (6.1 nsec = 1.0 units)
+        </p>
+        <table border="1" class="">
+            <tr>
+                <th class="">
+                    Name</th>
+                <th class="">
+                    Median</th>
+                <th class="">
+                    Mean</th>
+                <th class="">
+                    StdDev</th>
+                <th class="">
+                    Min</th>
+                <th class="">
+                    Max</th>
+                <th class="">
+                    Samples</th>
+            </tr>
+            <tr>
+                <td class="">
+                    NOTHING [count=1000]</td>
+                <td class="">
+                    -0.438</td>
+                <td class="">
+                    -0.252</td>
+                <td class="">
+                    0.541</td>
+                <td class="">
+                    -0.438</td>
+                <td class="">
+                    1.371</td>
+                <td class="">
+                    10</td>
+            </tr>
+            <tr>
+                <td class="">
+                    MethodCalls: EmptyStaticFunction() [count=1000 scale=10.0]</td>
+                <td class="">
+                    1.000</td>
+                <td class="">
+                    0.949</td>
+                <td class="">
+                    0.080</td>
+                <td class="">
+                    0.851</td>
+                <td class="">
+                    1.060</td>
+                <td class="">
+                    10</td>
+            </tr>
+            <tr>
+                <td class="">
+                    Loop 1K times [count=1000]</td>
+                <td class="">
+                    343.472</td>
+                <td class="">
+                    359.915</td>
+                <td class="">
+                    29.826</td>
+                <td class="">
+                    341.746</td>
+                <td class="">
+                    441.198</td>
+                <td class="">
+                    10</td>
+            </tr>
+            <tr>
+                <td class="">
+                    MethodCalls: EmptyStaticFunction(arg1,...arg5) [count=1000 scale=10.0]</td>
+                <td class="">
+                    1.556</td>
+                <td class="">
+                    1.549</td>
+                <td class="">
+                    0.099</td>
+                <td class="">
+                    1.403</td>
+                <td class="">
+                    1.788</td>
+                <td class="">
+                    10</td>
+            </tr>
+            <tr>
+                <td class="">
+                    MethodCalls: aClass.EmptyInstanceFunction() [count=1000 scale=10.0]</td>
+                <td class="">
+                    1.148</td>
+                <td class="">
+                    1.160</td>
+                <td class="">
+                    0.091</td>
+                <td class="">
+                    1.070</td>
+                <td class="">
+                    1.334</td>
+                <td class="">
+                    10</td>
+            </tr>
+            <tr>
+                <td class="">
+                    MethodCalls: aClass.Interface() [count=1000 scale=10.0]</td>
+                <td class="">
+                    1.597</td>
+                <td class="">
+                    1.664</td>
+                <td class="">
+                    0.089</td>
+                <td class="">
+                    1.592</td>
+                <td class="">
+                    1.843</td>
+                <td class="">
+                    10</td>
+            </tr>
+        </table>
+    </dd>
+</dl>
+<p>
+    Often only a small number of benchmarks are of interest.&nbsp; To allow users to 
+    control which benchmarks are run, benchmarks are grouped into &#39;areas&#39; which can 
+    be specified on the command line.&nbsp;&nbsp; MeasureIt /? will give you a list 
+    of all the available areas that can be specified.&nbsp; You can then simply list 
+    the ones of interest to limit which benchmarks are run.&nbsp; For example to run 
+    just the benchmarks related to method calls and field access you can do</p>
+<blockquote>
+    MeasureIt MethodCalls FieldAccess</blockquote>
+<h4>
+    Best practices and Caveats</h4>
+<p>
+    &nbsp;Fundamentally the <b>MeasureIt</b> harness measures wall clock time.&nbsp;&nbsp; 
+    Thus in particular if you measure on a uniprocessor and there are other 
+    background tasks running then they will interfere with the measurements (this is 
+    not as problematic on a multi-processor).&nbsp;&nbsp; Generally it is not a big 
+    problem because sensitive benchmarks tend to not block, and tend to complete in 
+    the single quantum of CPU time given to a thread, so they tend to not be 
+    interrupted.&nbsp;&nbsp; Still it is best, however to avoid other work on the 
+    machine while the harness is running.&nbsp;&nbsp;&nbsp;
+</p>
+<p>
+    While MeasureIt does take several samples to highlight variability, it does take 
+    all these samples in the same process and very close to each other in time.&nbsp; 
+    Thus it is possible that the measurements may vary significantly when run in a 
+    different process, or when spread out more in time within the process.&nbsp;&nbsp; 
+    Thus be alert to this and if you see unexplained variability in different runs 
+    or under different conditions, keep in mind that the variability metrics that 
+    MeasureIt provides are <b>lower bound</b> on the true variability of the 
+    measurement.
+</p>
+<h3>
+    <a class="" name="HowMeasurements">How Measurements are Actually Taken</a></h3>
+<p>
+    MeasureIt goes to some trouble to minimize and highlight the most common sources 
+    of measurement error.&nbsp;&nbsp; These include
+</p>
+<ol>
+    <li>&#39;First Time&#39; costs like Just In Time compilation, memory page faults, and 
+        initialization code paths.&nbsp;&nbsp; This is avoided by running the benchmark once 
+        before measurement begins</li>
+    <li>Timer Resolution.&nbsp; The timer MeasureIt uses typically has a resolution of &lt; 
+        1usec.&nbsp;&nbsp; Thus very small intervals (eg nsec) need to be &#39;magnified&#39; by repeating 
+        them many times to bring the actual time being measured to something more like 
+        100usec or 1 msec.&nbsp;&nbsp; Thus benchmarks have a &#39;count&#39; which represents the number 
+        of times the benchmark is repeated for a single measurement.&nbsp;&nbsp; The value&nbsp; 
+        presented, however represents the time consumed by a single iteration (thus you 
+        can ignore the count unless you are doing a measurement error analysis).&nbsp;&nbsp;&nbsp;
+    </li>
+    <li>Overhead associated with starting and stopping the counter (and looping over the 
+        benchmark)&nbsp; This is minimized by measuring an empty benchmark and subtracting 
+        that value from every measurement as &#39;overhead&#39;.&nbsp;&nbsp; However since there is 
+        variability in this overhead, this can lead to negative times being reported for 
+        very small intervals (&lt; 10 usec).&nbsp;&nbsp; However well designed benchmarks should 
+        never be measuring times this small (point (2))</li>
+    <li>Variability associated with loops.&nbsp;&nbsp;&nbsp; Very small loops (as might happen for 
+        short benchmarks) can have execution times that vary depending on the exact 
+        memory address of the loop.&nbsp;&nbsp; It is very difficult to control for this 
+        variability.&nbsp; Instead a robust solution is to &#39;macro expand&#39; the benchmark a 
+        number times (typically 10 is enough), so that the time the benchmark takes is 
+        large compared to the overhead of the loop itself.&nbsp;&nbsp; However it is useful to 
+        report the number as if the benchmark was not cloned.&nbsp;&nbsp; This is called the 
+        &#39;scale&#39; of the benchmark, and the reported number is the measured time (of a 
+        single loop) divided by the scale.&nbsp;&nbsp; Like the count, it can be ignored unless 
+        you are doing an measurement error analysis.&nbsp;&nbsp; </li>
+    <li>Benchmark variability:&nbsp;&nbsp; The benchmark is run a number of times (typically 10), 
+        and mean, median, min, max and standard deviation are reported to highlight the 
+        variability in the measurement.&nbsp; </li>
+</ol>
+<p>
+    To highlight variability, the first line in the output table is the &#39;NOTHING&#39; 
+    benchmark.&nbsp; It measures an empty benchmark body, and the time should be 
+    zero if there were no measurement error.&nbsp; Thus the number in this line give 
+    us some idea of the best accuracy we can hope to have.&nbsp; In the example 
+    above we can see that this measurement varied from -.438 to +1.371, so numbers 
+    smaller than that are dubious.&nbsp;&nbsp; However keep in mind that all 
+    benchmarks with a scale are actually measuring a time that is bigger than is 
+    actually reported.&nbsp; For example the &#39;EmptyStaticFunction&#39; benchmark has a 
+    scale of 10, which means that the reported number 1.0 is was really measuring 10 
+    units of time.&nbsp;&nbsp; Thus errors of -.438 or + 1.37 are not 43% or 137% 
+    errors but rather 4.3% to 13% errors.&nbsp;&nbsp; This is consistent with the 
+    min and max values reported for &#39;EmptyStaticFunction&#39; (which suggest 6% to 15% 
+    error).&nbsp; Thus the &#39;NOTHING&#39; benchmark gives you a good idea of how much 
+    error an inherent part of the harness.&nbsp;
+</p>
+<p>
+    In addition to the error introduced by the harness itself, the benchmark will 
+    have variability of its own.&nbsp;&nbsp; The standard way of dealing with this 
+    is to find the mean (average) of the measurements or the median (middle value in 
+    a sorted list).&nbsp;&nbsp; Generally the mean is a better measurement if you 
+    use the number to compute an aggregate throughput for a large number of items. 
+    The median is a better guess if you want a&nbsp; typical sample. The median also 
+    has the advantage that it is more stable if the sample is noisy (eg has large 
+    min or max values).&nbsp; If the median and the mean differ significantly 
+    however, there is a good chance there is too much error for the data to be 
+    valuable.&nbsp;&nbsp;
+</p>
+<h4>
+    <a class="" name="Limits">Limits of accuracy</a></h4>
+<p>
+    The min and max statistics give you the lower and upper bounds of the expected 
+    error of the measurements.&nbsp; The standard deviation is also a useful error 
+    metric.&nbsp;&nbsp; It is very likely that the statistics for the error form 
+    what statisticians call a &#39;normal distribution&#39;.&nbsp;&nbsp; If this assumption 
+    holds, then 68% of all measurements should be with one standard deviation of the 
+    mean, and over 95% of all measurements should be within 2 standard deviations of 
+    the mean.&nbsp;&nbsp; For example, since the &#39;EmptyStaticFunction&#39; benchmark has 
+    a standard deviation of .08, and a mean of .949, then our expectation is that 
+    68% of all samples should be in the range of 0.948-0.08 = .868 and 0.948+0.08 = 
+    1.028 and that 95% of all samples should be within 0.948-2*0.08 = .788 and 
+    0.948+2*0.08 = 1.108.&nbsp;&nbsp; This is another useful way of quickly getting 
+    a handle on expected error.&nbsp;
+</p>
+<h3>
+    <a class="" name="Unpacking">Unpacking the Source</a></h3>
+<p>
+    In performance work, the details matter!&nbsp;&nbsp; On the display for the 
+    benchmark it gives a short description of what the benchmark does, but if the 
+    scenario is at all complicated, you will find yourself wondering exactly what is 
+    being measured and under what conditions.&nbsp;&nbsp; Well, you can find out!&nbsp;&nbsp; 
+    The MeasureIt.exe has embedded within it its complete source code.&nbsp;&nbsp; 
+    To unpack it simply type
+</p>
+<ul>
+    <li>MeasureIt /edit</li>
+</ul>
+<p>
+    Which will unpack the source code into a &#39;MeasureIt.src&#39; directory and launch 
+    the Visual Studio .SLN file (If you have it installed).&nbsp; Even without 
+    Visual Studio you can view the source code with notepad or another editor.&nbsp;&nbsp; 
+    A good place to start browsing the source code is the _ReadMe.cs file, which 
+    contains an overview of the rest of the source code.&nbsp;&nbsp; If you use Visual Studio 
+    I strongly recommend that you download the code &#39;hyperlinking&#39; feature mentioned 
+    at the top of the _ReadMe.cs file.&nbsp;&nbsp; This will allow you to navigate the code 
+    base more easily.&nbsp;
+</p>
+<p>
+    All the benchmarks themselves live in the &#39;MeasureIt.cs&#39; file and you can find 
+    the code associated with a particular benchmark by searching for its name. For 
+    example the benchmark for &#39;FullTrustCall&#39; is
+</p>
+<pre>        timer1000.Measure(&quot;FullTrustCall()&quot;, 1, delegate
+       {
+           PinvokeClass.FullTrustCall(0, 0);
+       });</pre>
+<p>
+    As you can see, a benchmark is simply a call to the &#39;Measure()&#39; method.&nbsp;&nbsp; 
+    The Measure() method takes three parameters:meters:</p>
+<ol>
+    <li>The name of the benchmark. This can be any string. </li>
+    <li>The scale of the benchmark (1 in this case) .This is now many times the code of 
+        interest is cloned within the body of the benchmark (do reduce measurement 
+        error). The number reported by the harness is the actual time divided by this 
+        number.</li>
+    <li>A delegate representing the code to be measured. Typically the delegate {} 
+        syntax is used to place the code inline. </li>
+</ol>
+<p>
+    In this case we see that the benchmark consists of a single call to the 
+    &#39;FullTrustCall()&#39; method.&nbsp; Searching for the definition we find
+</p>
+<pre>        [DllImport(&quot;mscoree&quot;, EntryPoint = &quot;GetXMLElement&quot;), SuppressUnmanagedCodeSecurityAttribute] 
+       public static extern void FullTrustCall(int x, int y); </pre>
+<p>
+    Which gives you all the details of exactly what is mean by a full trust call 
+    (basically using the SuppressUnmanagedCodeSecurityAttribute).&nbsp; It also 
+    shows that the actual native call happens to be a method called GetXMLElement in 
+    the mscoree DLL.&nbsp;&nbsp; There is a comment in this code that indicates that 
+    this particular native method consists of exactly 2 instructions (determined by 
+    steping through it).&nbsp; Thus all the information needed to understand 
+    anomolous performance results is available.&nbsp;
+</p>
+<h4>
+    <a class="" name="Rebuilding">Rebuilding MeasureIt</a></h4>
+<p>
+    <b>MeasureIt</b> is also set up to make changing it and rebuilding easy.&nbsp;&nbsp; 
+    Inside Visual Studio this is as easy as invoking the build command (eg F6), but 
+    can also be done easily for those without Visual Studio by simply executing the 
+    &#39;build.bat&#39; file in the MeasureIt.src directory.&nbsp;&nbsp; The only 
+    prerequisite for build.bat is that a current (V2.0 or later) verison of the
+    <a href="http://msdn2.microsoft.com/en-us/netframework/default.aspx">.NET 
+    Runtime</a> be installed (Windows Vista comes with it built in).&nbsp;&nbsp;&nbsp;&nbsp; 
+    In either case, the build will automatically update the original MeasureIt.exe 
+    file (including incorperating the updates source into it) when it is rebuilt.&nbsp;&nbsp;&nbsp; 
+    Thus with one keystroke you can update your oringinal MeasureIt.exe to 
+    incorperate any changes you need.&nbsp;
+</p>
+<p>
+    The build currently has 12 &#39;expected&#39; warnings about links to files within 
+    projects.&nbsp; This results from the technique used to incorperate the source 
+    into the EXE and they can be ignored.&nbsp;</p>
+<h3>
+    <a class="" name="Debugging">Debugging Optimized Code In Visual Studio 
+    (Validating a benchmark)</a></h3>
+<p>
+    When measuring a benchmark that does very little (eg a single method call or 
+    other operation), it is likley that the just in time (JIT) compiler may 
+    transform the benchmark in a way that would yield misleading results.&nbsp;&nbsp; 
+    For example, to measure a single method call the benchmark might call a empty 
+    method, but unless special measures are taken the JIT compiler will optimize the 
+    method away completely.&nbsp;&nbsp; Thus it is often a good idea to look at the 
+    actual machine code associated with small benchmarks to confirm that you 
+    understand the transformations that the runtime and JIT have done.&nbsp; In a 
+    debugger like Visual Studio, it should be as easy as setting a breakpoint in 
+    your benchmark code and switching to the disassembly window (Debug -&gt; Windows 
+    -&gt;Disassembly). Unfortunately, the default options for Visual Studio are 
+    designed to ease debugging, not to do performance investigations, so you need to 
+    change two options to make this work</p>
+<ol>
+    <li>Clear the checkbox : Tools -&gt; Options… -&gt; Debugging -&gt; General -&gt; Suppress JIT 
+        Optimization. By default this box is checked, which means that even when 
+        debugging code that should be optimized, the debugger tells the runtime not to. 
+        The debugger does this so that optimizations don&#39;t interfere with the inspection 
+        of local variables, but it also means that you are not looking at the code that 
+        is actually run. I always uncheck this option because I strongly believe that 
+        debuggers should strive to only inspect, and not change the program being 
+        debugged.&nbsp; Unsetting this option has no effect on code that was compiled &#39;Debug&#39; 
+        since the runtime would not have optimized that code anyway.</li>
+    <li>Clear the checkbox Tools -&gt; Options -&gt; Debugging -&gt; General -&gt; Enable Just My 
+        Code. The &#39;Just My Code&#39; feature instructs the debugger not to show you code 
+        that you did not write. Generally this is feature removes the &#39;clutter&#39; of call 
+        frames that are often not interesting to the application developer. However this 
+        feature assumes that any code that is optimized can&#39;t be yours (it assumes your 
+        code is compiled debug or suppressed JIT Optimizations is turned on). If you 
+        allow JIT optimizations but don&#39;t turn off &#39;Just My Code&#39; you will find that you 
+        never hit any breakpoints because the debugger does not believe your code is 
+        yours. </li>
+</ol>
+<p>
+    Once you have unset these options, they remain unset for ALL projects. Generally 
+    this works out well, but it does mean that you may not get the Just My Code 
+    feature when you want it. You may find yourself switching Just My Code on and 
+    off as you go from debugging to performance evaluation and back (I personally am 
+    happy leaving it off all the time).&nbsp;
+</p>
+<p>
+    Once you have set up Visual Studio, you can now set breakpoints in your 
+    benchmark and view the disassembly to confirm that the benchmark is doing what 
+    you think it should be.&nbsp; This technique is valuable any time a small 
+    benchmark has unexpected performance characteristics.
+</p>
+<h3>
+    <a class="" name="NewBenchmarks">Making New Benchmarks</a></h3>
+<p>
+    The real power of MeasureIt comes from the ease of adding new benchmarks.&nbsp; 
+    In the simplest case, to add a new benchmark</p>
+<ol>
+    <li>Add a &#39;area&#39; to the program for your new benchmark by declaring a static method 
+        of the form &#39;MeasureXXXX()&#39; on the MeasureIt class.&nbsp; The XXX is the name of your 
+        new area.&nbsp;&nbsp; If this method is public then this benchmark will be run by default 
+        (when no area is specified on the command line).&nbsp; If the method is private, then 
+        the area will only be run when the area is explictly mentioned on the command 
+        line. </li>
+    <li>In this new method add one or more benchmarks by calling the &#39;Measure&#39; method on 
+        the &#39;timer1000&#39; variable of the MeasureIt class.&nbsp; </li>
+</ol>
+<p>
+    That&#39;s it!&nbsp;&nbsp; For example, we might want to learn more about the the 
+    costs of getting and setting environment variables.&nbsp; To do this we could 
+    add the following code to the MeasureIt class.</p>
+<pre>    static public void MeasureEnvironmentVars()
+    {
+        timer1000.Measure(&quot;GetEnvironmentVariable(&#39;WinDir&#39;)&quot;, 1, delegate
+        {
+            Environment.GetEnvironmentVariabsteppinganomalousle(&quot;WinversionincorporatingoriginalincorporateincorporateDirlikely&quot;);
+        });
+        
+        timerexplicitly1000.Measure(&quot;SetEnvironmentVariable(&#39;X&#39;, &#39;1&#39;)&quot;, 1, delegate
+        {
+            Environment.SetEnvironmentVariable(&quot;X&quot;, &quot;1&quot;);
+        });
+    }</pre>
+<p>
+    The &#39;timer1000&#39; variable is useful for benchmarks that take less than 100usec to 
+    run.&nbsp;&nbsp;&nbsp; As its name suggests this timer will loop 1000 times over 
+    the benchmark.&nbsp;&nbsp; Thus it will extend the time to something 
+    like100msec, which makes measurement error small, but also will not make humans 
+    impatient.&nbsp;&nbsp; As mentioned, before the &#39;Measure()&#39; method takes a name 
+    of a benchmark, the scale, and a delegate representing the body of the 
+    benchmark.&nbsp;&nbsp; Often you can simply name the benchmark the literal code 
+    being run, but otherwise any short, descriptive name will do.&nbsp;&nbsp; The 
+    scale variable is used for benchmarks that only use 50 or less instructions and 
+    will be explained in the next section.&nbsp; It should be 1 if the benchmark is 
+    already large enough.&nbsp; Finally you have the delegate that represents 
+    benchmark itself.</p>
+<p>
+    When writing the benchmark code is is important to realize that the method will 
+    be called many times by the harness.&nbsp; This works great for benchmarks that 
+    are &#39;stateless&#39;, however can be a problem if the act of calling the benchmark 
+    will perturb state such that would cause the performance to change (for example, 
+    adding a entry to a table).&nbsp; That case is discussed in a later section.&nbsp;
+</p>
+<h4>
+    <a class="" name="Scaling">Scaling Small Benchmarks</a>
+</h4>
+<p>
+    If the benchmark is less 50 instructions or so, it is best to make the benchmark 
+    bigger by cloning the benchmark a number of times in the delegate body being 
+    measured.&nbsp;&nbsp;&nbsp; To keep the results easy to interpret, however, it 
+    is important that the time measured is then divided by the number of times the 
+    benchmark was cloned.&nbsp; That is the purpose of the &#39;scale&#39; parameter of&nbsp; 
+    the Measure() method.&nbsp; Here is an example used for method calls.&nbsp; 10 
+    is passed for the scale because the benchmark is cloned 10 times.&nbsp;
+</p>
+<pre>        timer1000.Measure(&quot;EmptyStaticFunction(arg1,...arg5)&quot;, <span 
+    class="style1"><font color="#cc0000">10</font></span>, delegate
+        {
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+            Class.EmptyStaticFunction5Arg(1, 2, 3, 4, 5);
+        });
+        </pre>
+<h4>
+    <a class="" name="LoopCounts">Modifying the Loop Counts</a></h4>
+<p>
+    As its name suggests timer1000 runs the benchmark 1000 times for every 
+    measurement.&nbsp;&nbsp; When the benchmark is larger than 100us, a loop count 
+    of 1000 will make the benchmark run unnecessarily long.&nbsp; While you can 
+    change loop count property on timer1000, it is generally not a good idea to do 
+    so because it could easily lead to confusion about how many iterations are to be 
+    done.&nbsp; Instead it is better to create new timers that are used when 
+    different loop counts are needed.&nbsp; For example the following code creates a 
+    new timer called timer1 that will only loop a single time for each measurement 
+    and will take three (instead of the usual 10) samples for computing min, max, 
+    and other statistics.&nbsp; This would be appropriate for benchmarks that take &gt; 
+    1sec to run.&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
+<pre>        timer1 = new MultiSampleCodeTimer(3, 1);    // Take three samples,  Loop count = 1
+       timer1.OnMeasure = logger.AddWithCount;</pre>
+<p>
+    In the code above, in addition to creating the new timer, the timer also needs 
+    to be hooked up to the HTML reporting infrastructure.&nbsp; This is what the 
+    second line does.&nbsp; The &#39;OnMeasure&#39; event is fired every time a timer has 
+    new data, and the second line tells it to call the &#39;AddWithCount&#39; method on 
+    &#39;logger&#39; when this happens.&nbsp; The logger then insures that the data shows up 
+    in the HTML report.&nbsp;
+</p>
+<p>
+    Using this technique you can change the loop count to whatever value makes sense 
+    to keep long enough to avoid measurement error, but short enough to allow 
+    efficient data collection.&nbsp;&nbsp; For very expensive benchmarks (&gt; 1 min) 
+    you may need to cut the number of measurements to only 1, but ideally you would 
+    still do at least 3, so you can get some idea of the variability of the 
+    benchmark.&nbsp;
+</p>
+<p>
+    Finally, by default timers &#39;prime&#39; the benchmark before actually doing a 
+    measurement.&nbsp; This insure that an &#39;first time&#39; initialization is done and 
+    does not skew the results.&nbsp;&nbsp; However when benchmarks are very long, (&gt; 
+    10 sec), this priming is expensive, and often not interesting.&nbsp;&nbsp; The 
+    timers have a property called &#39;Prime&#39; which by default is true but can be set to 
+    false to avoid priming the benchmark and save time.&nbsp;
+</p>
+<h4>
+    <a class="" name="State">Benchmarks with State</a></h4>
+<p>
+    Benchmarks really need to return the system to the same state they were in 
+    before the benchmark started.&nbsp; However even some very simple scenarios 
+    don&#39;t have this property.&nbsp; For this case we need a slightly more 
+    complicated &#39;Measure&#39; routine that knows how to &#39;reset&#39; the state of the system 
+    so that another run of the benchmark can be done.&nbsp;&nbsp; For example. the 
+    following code finds the average cost of adding 1000 entries to a dictionary.
+</p>
+<pre>        Dictionary&lt;int, int&gt; intDict = new Dictionary&lt;int, int&gt;();
+        timer1.Measure(&quot;dictAdd(intKey, intValue)&quot;, <span class="style1"><font 
+    color="#cc0000">1000</font></span>,   // Scaled by 1000 because we do 1000 Add()s
+            delegate             // Benchmark 
+            {
+                for (int i = 0; i &lt; 1000; i++)
+                    intDict.Add(i, i);
+            },
+            delegate             // Reset routine
+            {
+                intDict.Clear();
+            });
+</pre>
+<p>
+    In this example, we pass two delegates to the Measure() routine.&nbsp; The first 
+    delegate is the benchmark code itself, which adds 1000 entries to a list.&nbsp; 
+    However&nbsp; because we pass 1000 as the &#39;scale&#39; parameter to Measure() this 
+    time will be divided by 1000, and thus report the average cost of adding a 
+    single element.&nbsp; At the end of every measurement, the harness calls the 
+    second delegate to &#39;reset&#39; the state&#39;&nbsp;&nbsp; In this case we just call the 
+    Clear() method.&nbsp;&nbsp; It is true that there is some measurement error 
+    because the cost of the loop is included in the measurement, but that error 
+    should be small.&nbsp;&nbsp; The result is that this code will measure the 
+    average time to add an element to add 1000 elements (in order).&nbsp;&nbsp;&nbsp;
+</p>
+<p>
+    It is worth noting how useful it is for someone using this benchmark to see the 
+    actual code for the benchmark.&nbsp;&nbsp; Because we know that &#39;Dictionary&#39; is 
+    implemented as a hash table, the fact that the entries were added in order 
+    probably does not skew our results (although we should check by doing some 
+    variations).&nbsp;&nbsp; However if the Dictionary was implemented as a sorted 
+    list, adding entries in order would be much faster than the &#39;random&#39; case, and 
+    our results would be skewed.&nbsp; As I mentioned before, in performance work, 
+    details matter, and it is good to be able to see (and change) the details as the 
+    need arises.&nbsp;&nbsp;&nbsp;
+</p>
+<h3>
+    <a class="" name="PowerOptions">Power Options</a></h3>
+<p>
+    Modern computers have the capability of slowing the frequency of the CPU&#39;s clock 
+    to save power.&nbsp;&nbsp;&nbsp; By default the operating system tries to 
+    determine what the correct balence between power and performance is.&nbsp; Thus 
+    it throttles the CPU when the computer is inactive and unthrottles it when it is 
+    being used heavily.&nbsp;&nbsp; This adaptation however does take time 
+    (typically 10s of Msecs), and always lags behind actual CPU usage.&nbsp;&nbsp; 
+    While in general this adaptation is a good thing, it will lead to unreliable 
+    benchmark numbers.&nbsp;&nbsp; Thus for benchmarking it is best to turn off this 
+    power saving feature.</p>
+    <p>
+        By default, on VISTA and above operating system MeasureIt does exactly this, and 
+        no additional user interaction is required.&nbsp; For older operating systems 
+        this needs to be done manually by going to the Control Panel&#39;s Power options and 
+        selecting the &#39;High Performance&#39; power scheme.
+</p>
+    <p>
+        While MeasureIt makes certain that its own benchmarks are run on the &#39;High 
+        Performance&#39; power scheme, other benchmarks will not have this capability.&nbsp; 
+        Thus as a an additional service measureIt exposes the following options for 
+        manually controlling the power scheme so that a non-measureIt benchmark can be 
+        run under the correct power scheme.</p>
+    <ul>
+        <li>measureIt /setHighPerformance</li>
+        <li>measureIt /setBalenced</li>
+        <li>measureIt /setPowerSaver</li>
+    </ul>
+    <p>
+        &nbsp;The power options capability only work on VISTA (or Win2008) and above.
+    </p>
+<h3>
+    <a class="" name="Contributions">Contributions/h3>
+<p>
+    If you are interested in contributing back any improvements you made to 
+    MeasureIt, you should contact me at <a href="mailto:vancem@microsoft.com">
+    vancem@microsoft.com</a> or leave a message at at
+    <a href="http://blogs.msdn.com/vancem/">my blog</a>.&nbsp;
+</p>
+<p>
+    &nbsp;</p>
+    
+</body>
+</html>
