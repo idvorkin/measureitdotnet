@@ -569,116 +569,98 @@ static class MeasureIt
     static unsafe public void MeasureArrays()
     {
         int[] aIntArray = new int[20];
-        fixed (int* aIntPtr = aIntArray)
+        int aInt = 1;
+        AnInterface[] aInterfaceArray = new Class[10];
+        Class aClass = new Class();
+        string[] aStringArray = new string[10];
+        string aString = "foo";
+
+        timer1000.Measure("aIntArray[i] = 1", 10, delegate
         {
-            int aInt = 1;
-            AnInterface[] aInterfaceArray = new Class[10];
-            Class aClass = new Class();
-            string[] aStringArray = new string[10];
-            string aString = "foo";
+            aIntArray[0] = aInt;
+            aIntArray[1] = aInt;
+            aIntArray[2] = aInt;
+            aIntArray[3] = aInt;
+            aIntArray[4] = aInt;
+            aIntArray[5] = aInt;
+            aIntArray[6] = aInt;
+            aIntArray[7] = aInt;
+            aIntArray[8] = aInt;
+            aIntArray[9] = aInt;
+        });
 
-            timer1000.Measure("aIntArray[i] = 1", 10, delegate
+        timer1000.Measure("localIntPtr[i] = 1", 10, delegate
+        {
+            fixed (int* localIntPtr = aIntArray)
             {
-                aIntArray[0] = aInt;
-                aIntArray[1] = aInt;
-                aIntArray[2] = aInt;
-                aIntArray[3] = aInt;
-                aIntArray[4] = aInt;
-                aIntArray[5] = aInt;
-                aIntArray[6] = aInt;
-                aIntArray[7] = aInt;
-                aIntArray[8] = aInt;
-                aIntArray[9] = aInt;
-            });
+                localIntPtr[0] = aInt;
+                localIntPtr[1] = aInt;
+                localIntPtr[2] = aInt;
+                localIntPtr[3] = aInt;
+                localIntPtr[4] = aInt;
+                localIntPtr[5] = aInt;
+                localIntPtr[6] = aInt;
+                localIntPtr[7] = aInt;
+                localIntPtr[8] = aInt;
+                localIntPtr[9] = aInt;
+            }
+        });
 
-            timer1000.Measure("localIntPtr[i] = 1", 10, delegate
-            {
-                fixed (int* localIntPtr = aIntArray)
-                {
-                    localIntPtr[0] = aInt;
-                    localIntPtr[1] = aInt;
-                    localIntPtr[2] = aInt;
-                    localIntPtr[3] = aInt;
-                    localIntPtr[4] = aInt;
-                    localIntPtr[5] = aInt;
-                    localIntPtr[6] = aInt;
-                    localIntPtr[7] = aInt;
-                    localIntPtr[8] = aInt;
-                    localIntPtr[9] = aInt;
-                }
-            });
+        timer1000.Measure("string[i] = aString", 10, delegate
+        {
+            aStringArray[0] = aString;
+            aStringArray[1] = aString;
+            aStringArray[2] = aString;
+            aStringArray[3] = aString;
+            aStringArray[4] = aString;
+            aStringArray[5] = aString;
+            aStringArray[6] = aString;
+            aStringArray[7] = aString;
+            aStringArray[8] = aString;
+            aStringArray[9] = aString;
+        });
 
-            timer1000.Measure("aIntPtr[i] = 1", 10, delegate
-            {
-                aIntPtr[0] = aInt;
-                aIntPtr[1] = aInt;
-                aIntPtr[2] = aInt;
-                aIntPtr[3] = aInt;
-                aIntPtr[4] = aInt;
-                aIntPtr[5] = aInt;
-                aIntPtr[6] = aInt;
-                aIntPtr[7] = aInt;
-                aIntPtr[8] = aInt;
-                aIntPtr[9] = aInt;
-            });
+        timer1000.Measure("aInterfaceArray[i] = aClass", 10, delegate
+        {
+            aInterfaceArray[0] = aClass;
+            aInterfaceArray[1] = aClass;
+            aInterfaceArray[2] = aClass;
+            aInterfaceArray[3] = aClass;
+            aInterfaceArray[4] = aClass;
+            aInterfaceArray[5] = aClass;
+            aInterfaceArray[6] = aClass;
+            aInterfaceArray[7] = aClass;
+            aInterfaceArray[8] = aClass;
+            aInterfaceArray[9] = aClass;
+        });
 
-            timer1000.Measure("string[i] = aString", 10, delegate
-            {
-                aStringArray[0] = aString;
-                aStringArray[1] = aString;
-                aStringArray[2] = aString;
-                aStringArray[3] = aString;
-                aStringArray[4] = aString;
-                aStringArray[5] = aString;
-                aStringArray[6] = aString;
-                aStringArray[7] = aString;
-                aStringArray[8] = aString;
-                aStringArray[9] = aString;
-            });
+        timer1000.Measure("1 for...Length aIntArray[i] = 1", 1, delegate
+        {
+            int[] localIntArray = aIntArray;
+            for (int i = 0; i < localIntArray.Length; i++)
+                localIntArray[i] = aInt;
+        });
 
-            timer1000.Measure("aInterfaceArray[i] = aClass", 10, delegate
-            {
-                aInterfaceArray[0] = aClass;
-                aInterfaceArray[1] = aClass;
-                aInterfaceArray[2] = aClass;
-                aInterfaceArray[3] = aClass;
-                aInterfaceArray[4] = aClass;
-                aInterfaceArray[5] = aClass;
-                aInterfaceArray[6] = aClass;
-                aInterfaceArray[7] = aClass;
-                aInterfaceArray[8] = aClass;
-                aInterfaceArray[9] = aClass;
-            });
+        timer1000.Measure("1 for...10 aIntArray[i] = 1", 1, delegate
+        {
+            int[] localIntArray = aIntArray;
+            for (int i = 0; i < 10; i++)
+                localIntArray[i] = aInt;
+        });
 
-            timer1000.Measure("1 for...Length aIntArray[i] = 1", 1, delegate
-            {
-                int[] localIntArray = aIntArray;
-                for (int i = 0; i < localIntArray.Length; i++)
-                    localIntArray[i] = aInt;
-            });
+        timer1000.Measure("1 for...Length aStringArray[i] = 1", 1, delegate
+        {
+            string[] localStringArray = aStringArray;
+            for (int i = 0; i < localStringArray.Length; i++)
+                localStringArray[i] = aString;
+        });
 
-            timer1000.Measure("1 for...10 aIntArray[i] = 1", 1, delegate
-            {
-                int[] localIntArray = aIntArray;
-                for (int i = 0; i < 10; i++)
-                    localIntArray[i] = aInt;
-            });
-
-            timer1000.Measure("1 for...Length aStringArray[i] = 1", 1, delegate
-            {
-                string[] localStringArray = aStringArray;
-                for (int i = 0; i < localStringArray.Length; i++)
-                    localStringArray[i] = aString;
-            });
-
-            timer1000.Measure("1 for...Length aInterfaceArray[i] = 1", 1, delegate
-            {
-                AnInterface[] localInterfaceArray = aInterfaceArray;
-                for (int i = 0; i < localInterfaceArray.Length; i++)
-                    localInterfaceArray[i] = aClass;
-            });
-
-        }
+        timer1000.Measure("1 for...Length aInterfaceArray[i] = 1", 1, delegate
+        {
+            AnInterface[] localInterfaceArray = aInterfaceArray;
+            for (int i = 0; i < localInterfaceArray.Length; i++)
+                localInterfaceArray[i] = aClass;
+        });
     }
     static public void MeasureDelegates()
     {

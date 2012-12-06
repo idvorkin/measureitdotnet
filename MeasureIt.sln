@@ -1,7 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "MeasureIt", "MeasureIt.csproj", "{94C11852-0026-4516-ABDB-0EE944FBEA4B}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeasureIt", "MeasureIt.csproj", "{94C11852-0026-4516-ABDB-0EE944FBEA4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
