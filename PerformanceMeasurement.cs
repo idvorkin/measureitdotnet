@@ -1,6 +1,7 @@
 /*  Copyright (c) Microsoft Corporation.  All rights reserved. */
 /* AUTHOR: Vance Morrison   Date  : 10/20/2007  */
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -188,18 +189,24 @@ namespace PerformanceMeasurement
                 this["CompileType"] = "JIT";
 
             // Are we Appdomain Shared, or not?
-            MethodInfo currentMethod = Assembly.GetEntryAssembly().EntryPoint;
-            LoaderOptimizationAttribute loaderAttribute = (LoaderOptimizationAttribute)System.Attribute.GetCustomAttribute(currentMethod, typeof(LoaderOptimizationAttribute));
-            if (loaderAttribute != null && loaderAttribute.Value == LoaderOptimization.MultiDomain)
-                this["CodeSharing"] = "AppDomainShared";
-            else
-                this["CodeSharing"] = "AppDomainSpecific";
+            CaptureCodeSharing();
 
             DebuggableAttribute debugAttribute = (DebuggableAttribute)System.Attribute.GetCustomAttribute(assemblyWithCode, typeof(System.Diagnostics.DebuggableAttribute));
             if (debugAttribute != null && debugAttribute.IsJITOptimizerDisabled)
                 this["CodeOptimization"] = "Unoptimized";
             else
                 this["CodeOptimization"] = "Optimized";
+        }
+
+        private void CaptureCodeSharing()
+        {
+            // get a method in this assembly.
+            var currentMethod =  Assembly.GetAssembly(this.GetType()).GetExportedTypes().First(x=>x.GetMethods()!=null).GetMethods().First();
+            LoaderOptimizationAttribute loaderAttribute = (LoaderOptimizationAttribute)System.Attribute.GetCustomAttribute(currentMethod, typeof(LoaderOptimizationAttribute));
+            if (loaderAttribute != null && loaderAttribute.Value == LoaderOptimization.MultiDomain)
+                this["CodeSharing"] = "AppDomainShared";
+            else
+                this["CodeSharing"] = "AppDomainSpecific";
         }
         static bool IsNGenedCodeLoaded(Assembly assembly)
         {

@@ -90,8 +90,17 @@ using System.Text.RegularExpressions;
 ///     CPU you do the run. Newer CPUs from the same manufacturer can also be
 ///     different, so keep that in mind when looking at the numbers.
 /// </summary>
-static class MeasureIt
+public static class MeasureIt
 {
+
+    // Helper method to be called from LinqPad
+    static public string   FromLinqPad()
+    {
+        Main(new String[0]);
+        // returning a string instead of void so linqpad .Dump() is not required when in Expression mode.
+        return "Look In Your Web Browser";
+    }
+
     // Uncomment the following attribute to test Addomain shared code.  
     // [LoaderOptimization(LoaderOptimization.MultiDomain)]
     static public int Main(string[] args)

@@ -98,11 +98,6 @@ namespace PerformanceMeasurement
     };
 
     /// <summary>
-    /// Action represents the code that CodeTimer or MultiSampleCodeTimer runs. 
-    /// </summary>
-    public delegate void Action();
-
-    /// <summary>
     /// The CodeTimer class only times one invocation of the code. Often, you want to collect many samples so
     /// that you can determine how noisy the resulting data is. This is what MultiSampleCodeTimer does.
     /// </summary>
