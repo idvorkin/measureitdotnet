@@ -2,13 +2,13 @@
 <package >
   <metadata>
     <id>MeasureIt.exe</id>
-    <version>0.1.1</version>
+    <version>0.2.0</version>
     <authors>idvorkin;vancemorrison</authors>
     <owners>idvorkin;vancemorrison</owners>
     <projectUrl>http://measureitdotnet.codeplex.com/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Measurement tool for dot net</description>
-    <releaseNotes>Initial Upload - with bugfix </releaseNotes>
+    <releaseNotes>Support for LinqPad</releaseNotes>
     <copyright>Copyright 2012</copyright>
     <tags>Performance</tags>
     <dependencies>
