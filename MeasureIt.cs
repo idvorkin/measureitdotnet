@@ -98,7 +98,7 @@ public static class MeasureIt
     {
         Main(new String[0]);
         // returning a string instead of void so linqpad .Dump() is not required when in Expression mode.
-        return "Look In Your Web Browser";
+        return "Use LinqpadUX instead";
     }
 
     // Uncomment the following attribute to test Addomain shared code.  
