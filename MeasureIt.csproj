@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="CodeTimers.cs" />
     <Compile Include="ComputerSpecs.cs" />
+    <Compile Include="LinqPadUX.cs" />
     <Compile Include="MeasureIt.cs" />
     <Compile Include="PerformanceMeasurement.cs" />
     <Compile Include="PowerManagement.cs" />
@@ -141,6 +142,11 @@
       <Type>Non-Resx</Type>
       <WithCulture>false</WithCulture>
       <LogicalName>app.config</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LinqPadUX.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <LogicalName>LinqPadUX.cs</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
