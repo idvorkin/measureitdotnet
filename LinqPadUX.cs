@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PerformanceMeasurement
 {
-    class LinqPadUX
+    public class LinqPadUX
     {
         public string DefaultBenchmarkToWebBrowser()
         {

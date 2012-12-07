@@ -43,7 +43,7 @@ namespace PerformanceMeasurement
             get { return category; }
             set { category = value; }
         }
-        public void AddWithCount(string name, int iterationCount, float scale, Stats sample)
+        public void AddWithCount(string name, int iterationCount, float scale, Samples samples)
         {
             if (!string.IsNullOrEmpty(category))
                 name = category + ": " + name;
@@ -61,7 +61,7 @@ namespace PerformanceMeasurement
                 name += "]";
             }
 
-            Add(name, sample);
+            Add(name, samples);
         }
         public void DisplayHtmlReport(string reportFileName)
         {
@@ -245,16 +245,16 @@ namespace PerformanceMeasurement
     {
         public StatsCollection()
         {
-            dict = new Dictionary<string, Stats>();
+            Measurements = new Dictionary<string, Stats>();
             order = new List<string>();
         }
 
-        public Stats this[string key] { get { return dict[key]; } }
-        public bool ContainsKey(string key) { return dict.ContainsKey(key); }
-        public IEnumerable<string> Keys { get { return order; } }
+        public Dictionary<string, Stats> Measurements;
+        public Stats this[string key] { get { return Measurements[key]; } }
+        public bool ContainsKey(string key) { return Measurements.ContainsKey(key); }
         public void Add(string key, Stats value)
         {
-            dict.Add(key, value);
+            Measurements.Add(key, value);
             order.Add(key);
         }
         public void WriteReportTable(TextWriter writer, float scale)
@@ -262,7 +262,7 @@ namespace PerformanceMeasurement
             writer.WriteLine("<table border>");
             writer.WriteLine("<tr><th>Name</th><th>Median</th><th>Mean</th><th>StdDev</th><th>Min</th><th>Max</th><th>Samples</th></tr>");
 
-            foreach (string key in this.Keys)
+            foreach (string key in this.Measurements.Keys)
             {
                 Stats value = this[key];
                 writer.Write("<tr>");
@@ -279,7 +279,6 @@ namespace PerformanceMeasurement
         }
 
         #region privates
-        Dictionary<string, Stats> dict;
         List<string> order;
         #endregion
     }
