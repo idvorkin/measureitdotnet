@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>MeasureIt.exe</id>
+    <version>0.1.1</version>
+    <authors>idvorkin;vancemorrison</authors>
+    <owners>idvorkin;vancemorrison</owners>
+    <projectUrl>http://measureitdotnet.codeplex.com/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Measurement tool for dot net</description>
+    <releaseNotes>Initial Upload - with bugfix </releaseNotes>
+    <copyright>Copyright 2012</copyright>
+    <tags>Performance</tags>
+    <dependencies>
+    </dependencies>
+  </metadata>
+</package>
