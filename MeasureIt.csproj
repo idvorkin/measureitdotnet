@@ -142,11 +142,13 @@
       <Type>Non-Resx</Type>
       <WithCulture>false</WithCulture>
       <LogicalName>app.config</LogicalName>
+      <Link>app.config</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="LinqPadUX.cs">
       <Type>Non-Resx</Type>
       <WithCulture>false</WithCulture>
       <LogicalName>LinqPadUX.cs</LogicalName>
+      <Link>LinqPadUX.cs</Link>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
