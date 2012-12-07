@@ -1,3 +1,4 @@
+rmdir -s -q  stage_nuget\lib\net20
 mkdir stage_nuget\lib\net20
 copy MeasureIt.exe stage_nuget\lib\net20
 copy MeasureIt.exe.config stage_nuget\lib\net20
