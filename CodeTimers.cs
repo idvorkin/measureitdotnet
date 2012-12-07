@@ -7,43 +7,41 @@ using System.Diagnostics;
 
 namespace PerformanceMeasurement
 {
+
     /// <summary>
-    /// Stats represents a list of samples (floating point values) This class can calculate the standard
+    /// Samples represents a list of samples (floating point values) 
+    /// </summary>
+    public class Samples : List<float>
+    {
+       public static implicit operator Stats(Samples samples)
+       {
+           return new Stats(samples);
+       }
+    };
+
+    /// <summary>
+    /// Stats are computed over list of samples (floating point values). This class can calculate the standard
     /// statistics on this list (Mean, Median, StandardDeviation ...)
     /// </summary>
-    public class Stats : IEnumerable<float>
+    public class Stats 
     {
-        public Stats() { data = new List<float>(); }
-
-        public void Add(float dataItem) { statsComputed = false; data.Add(dataItem); }
-        public void RemoveRange(int index, int count)
+        public Stats(Samples samples)
         {
-            data.RemoveRange(index, count);
-            statsComputed = false;
+            this.samples = new List<float>(samples.ToArray());
         }
-        internal void Adjust(float delta)
-        {
-            statsComputed = false;
-            for (int i = 0; i < data.Count; i++)
-                data[i] += delta;
-        }
-        public int Count { get { return data.Count; } }
-        public float this[int idx] { get { return data[idx]; } }
-        public IEnumerator<float> GetEnumerator() { return data.GetEnumerator(); }
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return data.GetEnumerator(); }
-
         public float Minimum { get { if (!statsComputed) ComputeStats(); return minimum; } }
         public float Maximum { get { if (!statsComputed) ComputeStats(); return maximum; } }
         public float Median { get { if (!statsComputed) ComputeStats(); return median; } }
         public float Mean { get { if (!statsComputed) ComputeStats(); return mean; } }
         public float StandardDeviation { get { if (!statsComputed) ComputeStats(); return standardDeviation; } }
+        public int Count { get { return this.samples.Count; } }
         public override string ToString()
         {
             if (!statsComputed)
                 ComputeStats();
             return "mean=" + mean.ToString("f3") + " median=" + median.ToString("f3") +
                    " min=" + minimum.ToString("f3") + " max=" + maximum.ToString("f3") +
-                   " sdtdev=" + standardDeviation.ToString("f3") + " samples=" + Count.ToString();
+                   " sdtdev=" + standardDeviation.ToString("f3") + " samples=" + samples.Count.ToString();
         }
 
         #region privates
@@ -55,9 +53,10 @@ namespace PerformanceMeasurement
             median = 0.0F;
             mean = 0.0F;
             standardDeviation = 0.0F;
+            var count = samples.Count;
 
             double total = 0;
-            foreach (float dataPoint in this)
+            foreach (float dataPoint in this.samples)
             {
                 if (dataPoint < minimum)
                     minimum = dataPoint;
@@ -66,28 +65,28 @@ namespace PerformanceMeasurement
                 total += dataPoint;
             }
 
-            if (Count > 0)
+            if (count > 0)
             {
-                data.Sort();
-                if (Count % 2 == 1)
-                    median = this[Count / 2];
+                samples.Sort();
+                if (count % 2 == 1)
+                    median = this.samples[count / 2];
                 else
-                    median = (this[(Count / 2) - 1] + this[Count / 2]) / 2;
-                mean = (float)(total / Count);
+                    median = (this.samples[(count / 2) - 1] + this.samples[count / 2]) / 2;
+                mean = (float)(total / count);
 
                 double squares = 0.0;
-                foreach (float dataPoint in this)
+                foreach (float dataPoint in this.samples)
                 {
                     double diffFromMean = dataPoint - mean;
                     squares += diffFromMean * diffFromMean;
                 }
-                standardDeviation = (float)Math.Sqrt(squares / Count);
+                standardDeviation = (float)Math.Sqrt(squares / count);
             }
 
             statsComputed = true;
         }
 
-        List<float> data;
+        List<float> samples;
         float minimum;
         float maximum;
         float median;
@@ -136,7 +135,7 @@ namespace PerformanceMeasurement
         /// </summary>
         public static float ResolutionUsec { get { return 1000000.0F / Stopwatch.Frequency; } }
 
-        public delegate void MeasureCallback(string name, int iterationCount, float scale, Stats sample);
+        public delegate void MeasureCallback(string name, int iterationCount, float scale, Samples sample);
         /// <summary>
         /// OnMeasure is signaled every time a Measure() is called. 
         /// </summary>
@@ -167,11 +166,11 @@ namespace PerformanceMeasurement
         /// <param name="action">The actual code to measure.</param>
         /// <param name="reset">Code that will be called before 'action' to reset the state of the benchmark.</param>
         /// <returns>A Stats object representing the measurements (in usec)</returns>
-        public Stats Measure(string name, float scale, Action action, Action reset)
+        public Samples Measure(string name, float scale, Action action, Action reset)
         {
             if (reset != null && IterationCount != 1)
                 throw new ApplicationException("Reset can only be used on timers with an iteration count of 1");
-            Stats statsUSec = new Stats();
+            var statsUSec = new Samples();
             if (Prime)
             {
                 if (reset != null)
@@ -194,27 +193,25 @@ namespace PerformanceMeasurement
         /// Prints the mean, median, min, max, and stdDev and count of the samples to the Console
         /// Useful as a target for OnMeasure
         /// </summary>
-        public static MeasureCallback PrintStats = delegate(string name, int iterationCount, float scale, Stats sample)
-        {
-            Console.WriteLine(name + ": " + sample.ToString());
-        };
+        public static MeasureCallback PrintStats = (name, iterationCount, scale, sample) => Console.WriteLine(name + ": " + name + " stats:" + ((Stats) sample));
         /// <summary>
         /// Prints the mean with a error bound (2 standard deviations, which imply a you have
         /// 95% confidence that a sampleUsec will be with the bounds (for a normal distribution). 
         /// This is a good default target for OnMeasure.  
         /// </summary>
-        public static MeasureCallback Print = delegate(string name, int iterationCount, float scale, Stats sample)
-        {
-            // +- two standard deviations covers 95% of all samples in a normal distribution 
-            float errorPercent = (sample.StandardDeviation * 2 * 100) / Math.Abs(sample.Mean);
-            string errorString = ">400%";
-            if (errorPercent < 400)
-                errorString = (errorPercent.ToString("f0") + "%").PadRight(5);
-            string countString = "";
-            if (iterationCount != 1)
-                countString = "count: " + iterationCount.ToString() + " ";
-            Console.WriteLine(name + ": " + countString + sample.Mean.ToString("f3").PadLeft(8) + " +- " + errorString + " msec");
-        };
+        public static MeasureCallback Print = delegate(string name, int iterationCount, float scale, Samples samples)
+            {
+                var stats = (Stats)samples;
+                // +- two standard deviations covers 95% of all samples in a normal distribution 
+                float errorPercent = (stats.StandardDeviation * 2 * 100) / Math.Abs(stats.Mean);
+                string errorString = ">400%";
+                if (errorPercent < 400)
+                    errorString = (errorPercent.ToString("f0") + "%").PadRight(5);
+                string countString = "";
+                if (iterationCount != 1)
+                    countString = "count: " + iterationCount.ToString() + " ";
+                Console.WriteLine(name + ": " + countString + stats.Mean.ToString("f3").PadLeft(8) + " +- " + errorString + " msec");
+            };
 
         #region privates
         CodeTimer timer;
