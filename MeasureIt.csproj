@@ -164,9 +164,7 @@
       <Link>LinqPadUX.cs</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="packages\NUnit.2.6.2\lib\nunit.framework.dll">
-      <WithCulture>false</WithCulture>
-      <LogicalName>nunit.framework.dll</LogicalName>
-      <Link>nunit.framkework.dll</Link>
+      <LogicalName>packages\NUnit.2.6.2\lib\nunit.framework.dll</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
