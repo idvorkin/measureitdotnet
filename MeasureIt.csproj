@@ -163,15 +163,17 @@
       <LogicalName>LinqPadUX.cs</LogicalName>
       <Link>LinqPadUX.cs</Link>
     </EmbeddedResource>
+    <EmbeddedResource Include="packages\NUnit.2.6.2\lib\nunit.framework.dll">
+      <WithCulture>false</WithCulture>
+      <LogicalName>nunit.framework.dll</LogicalName>
+      <Link>nunit.framkework.dll</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="nunit.framework.dll" />
-  </ItemGroup>
-  <PropertyGroup>
+    <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
     <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)..\$(TargetFileName)"</PostBuildEvent>
