@@ -38,6 +38,12 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Reference Include="nunit.framework">
+      <!-- In source control nunit is found under nuget path--> 
+      <HintPath>packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+      <!-- when extracted via /edit it's found in root path--> 
+      <HintPath>nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System.Management" />
     <Reference Include="System.Web" />
     <Reference Include="System.xml" />
@@ -50,6 +56,7 @@
     <Compile Include="MeasureIt.cs" />
     <Compile Include="PerformanceMeasurement.cs" />
     <Compile Include="PowerManagement.cs" />
+    <Compile Include="UnitTests.cs" />
     <Compile Include="_README.cs" />
     <Compile Include="Library\Util\ResourceUtilities.cs" />
     <Compile Include="Library\Util\StreamUtilities.cs" />
@@ -78,6 +85,12 @@
       <WithCulture>false</WithCulture>
       <Link>PerformanceMeasurement.cs</Link>
       <LogicalName>PerformanceMeasurement.cs</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UnitTests.cs">
+      <Type>Non-Resx</Type>
+      <WithCulture>false</WithCulture>
+      <Link>UnitTests.cs</Link>
+      <LogicalName>UnitTests.cs</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="_README.cs">
       <Type>Non-Resx</Type>
@@ -153,6 +166,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="nunit.framework.dll" />
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>
