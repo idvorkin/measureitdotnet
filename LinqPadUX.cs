@@ -75,7 +75,7 @@ namespace PerformanceMeasurement
     {
         public static string DefaultBenchmarkToWebBrowser()
         {
-            MeasureIt.Main(new String[1]);
+            MeasureIt.Main(new String[0]);
             return "Look in your web browser";
         }
 
